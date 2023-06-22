@@ -21,7 +21,7 @@ const secret = crypto.randomBytes(32).toString('hex');
 
 const corsOptions = {
   credentials: true,
-  origin: process.env.REACT_APP_API_URL || 'http://localhost:4000',
+  origin: 'https://jdnblog.netlify.app',
 };
 
 app.use(cors(corsOptions));
@@ -31,7 +31,15 @@ app.use(cookieParser());
 // endpoint for picture location
 app.use('/uploads', express.static(__dirname + '/uploads'));
 
-mongoose.connect('mongodb+srv://blog:St2vVqAbscrvxX2a@cluster1.jmqle3f.mongodb.net/?retryWrites=true&w=majority')
+mongoose.connect(process.env.MONGODB_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
+
+
+mongoose.connection.on('connected', () => {
+  console.log('Connected to MongoDB');
+});
 
 // Define routes
 app.post("/register", async (req, res) => {
