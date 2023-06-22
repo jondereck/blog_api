@@ -8,7 +8,6 @@ const UserModel = require('./models/User');
 const PostModel = require('./models/Post')
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { body, validationResult } = require('express-validator');
 
 const crypto = require('crypto')
 const cookieParser = require('cookie-parser')
@@ -22,7 +21,7 @@ const secret = crypto.randomBytes(32).toString('hex');
 
 const corsOptions = {
   credentials: true,
-  origin: process.env.REACT_APP_API_URL || 'http://localhost:3000',
+  origin: process.env.REACT_APP_API_URL || 'http://localhost:4000',
 };
 
 app.use(cors(corsOptions));
