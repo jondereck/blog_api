@@ -19,7 +19,7 @@ const secret = process.env.JWT_SECRET; // Load the secret from environment varia
 
 const corsOptions = {
   credentials: true,
-  origin: ['https://jdnblog.netlify.app', 'http://localhost:3000'],
+  origin: 'https://jdnblog.netlify.app',
   methods: 'GET, POST, PUT, DELETE',
   allowedHeaders: 'Content-Type, Authorization',
 };
@@ -51,7 +51,6 @@ app.use((err, req, res, next) => {
 
 app.post('/register', async (req, res) => {
   const { username, password } = req.body;
-
   if (username.length < 4) {
     return res.status(400).json({ error: 'Username should be at least 4 characters long' });
   }
@@ -59,6 +58,11 @@ app.post('/register', async (req, res) => {
   if (!/(?=.*\d)(?=.*[a-z])(?=.*[A-Z])/.test(password)) {
     return res.status(400).json({ error: 'Password should contain at least one lowercase, uppercase letter, and digit' });
   }
+
+  if (/\s/.test(username)) {
+    return res.status(400).json({ error: 'Username should not contain spaces' });
+  }
+
 
   try {
     const userDoc = await UserModel.create({
