@@ -12,7 +12,7 @@ const PostSchema = new Schema(
     summary: {
       type: String,
       required: true,
-      minlength: [20, "Summary must be at least 20 characters long"],
+      minlength: [20, "Summary must be at least 10 characters long"],
     },
     content: {
       type: String,
