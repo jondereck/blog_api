@@ -67,24 +67,15 @@ app.post('/register', async (req, res) => {
     });
     res.json({ success: 'Registration successful' });
   } catch (error) {
-    switch (error.name) {
-      case 'ValidationError':
-        const errors = Object.values(error.errors).map((err) => err.message);
-        res.status(400).json({ errors });
-        break;
-      case 'MongoError':
-        if (error.code === 11000 && error.keyPattern && error.keyPattern.username) {
-          res.status(400).json({ error: 'Username already taken' });
-        } else {
-          res.status(400).json({ error: 'Registration failed' });
-        }
-        break;
-      default:
-        res.status(400).json({ error: 'Registration failed' });
-        break;
+    if (error.code === 11000 && error.keyPattern && error.keyPattern.username) {
+      res.status(400).json({ error: 'Username already taken' });
+    } else {
+      res.status(400).json({ error: 'Registration failed' });
     }
   }
 });
+
+
 
 app.post('/login', async (req, res) => {
   try {
@@ -195,8 +186,8 @@ app.post('/post', upload.single('file'), authenticate, async (req, res) => {
       cover: newPath,
       author: id,
     });
-    
-    res.json({success:'Successfully created a post.'});
+
+    res.json(postDoc);
   } catch (error) {
     res.status(500).json({ error: 'An error occurred' });
   }
