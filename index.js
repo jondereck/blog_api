@@ -20,9 +20,12 @@ const secret = process.env.JWT_SECRET; // Load the secret from environment varia
 const corsOptions = {
   credentials: true,
   origin: ['https://jdnblog.netlify.app', 'http://localhost:3000'],
+  methods: 'GET, POST, PUT, DELETE',
+  allowedHeaders: 'Content-Type, Authorization',
 };
 
 app.use(cors(corsOptions));
+
 app.use(express.json());
 app.use(cookieParser());
 
