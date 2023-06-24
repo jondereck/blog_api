@@ -50,7 +50,7 @@ app.use((err, req, res, next) => {
 });
 
 app.post('/register', async (req, res) => {
-  // const { username, password } = req.body;
+  const { username, password } = req.body;
   if (username.length < 4) {
     return res.status(400).json({ error: 'Username should be at least 4 characters long' });
   }
