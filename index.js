@@ -223,14 +223,15 @@ app.put('/post', upload.single('file'), authenticate, async (req, res) => {
       cover: newPath ? newPath : postDoc.cover,
     });
 
-    const updatedPost = await PostModel.findById(id);
+     const updatedPost = await PostModel.findById(id);
 
-    res.json({ success: 'Post updated successfully', post: updatedPost });
+  res.json({ success: 'Post updated successfully', post: updatedPost });
+
+    res.json(postDoc);
   } catch (error) {
     res.status(500).json({ error: 'An error occurred' });
   }
 });
-
 
 app.get('/post', async (req, res) => {
   try {
