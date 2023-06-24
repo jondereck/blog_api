@@ -4,8 +4,8 @@
   "description": "blog",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon index.js",
-    "build": "npm i"
+    "start": "node build/index.js"
+   
   },
   "keywords": [],
   "author": "jonderecknifas",
