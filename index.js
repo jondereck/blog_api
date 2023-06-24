@@ -1,9 +1,11 @@
 const express = require('express');
 const app = express();
+const session = require('express-session');
 const dotenv = require('dotenv');
 dotenv.config();
 const cors = require('cors');
 const mongoose = require('mongoose');
+const MongoStore = require('connect-mongo');
 const UserModel = require('./models/User');
 const PostModel = require('./models/Post');
 const bcrypt = require('bcryptjs');
@@ -16,14 +18,29 @@ const fs = require('fs');
 
 const salt = bcrypt.genSaltSync(10);
 const secret = process.env.JWT_SECRET; // Load the secret from environment variable
-
 const corsOptions = {
   credentials: true,
   origin: ['https://jdnblog.netlify.app', 'http://localhost:3000'],
   methods: 'GET, POST, PUT, DELETE',
   allowedHeaders: 'Content-Type, Authorization',
 };
+const store = new MongoStore({
+  mongoUrl:process.env.MONGODB_URI,
+  collection: 'session',
+});
 
+app.use(session({
+  secret: process.env.sessionSecret, // your secret key to check session
+  resave: false,
+  saveUninitialized: false,
+  cookie: { maxAge: 604800000, //one week(1000*60*60*24*7)
+           sameSite: "none",
+           secure : true
+          }, 
+  store: store
+}));
+
+app.set("trust proxy",1);
 app.use(cors(corsOptions));
 
 app.use(express.json());
