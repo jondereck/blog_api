@@ -142,37 +142,7 @@ app.post('/logout', (req, res) => {
   }
 });
 
-app.post('/post', upload.single('file'), authenticate, async (req, res) => {
-  const { title, summary, content } = req.body;
-  const errors = {};
-  
-  if (!title || title.trim() === "") {
-    errors.title = "Title cannot be empty";
-  } else if (title.length < 4) {
-    errors.title = "Title should be at least 4 characters long";
-  }
-  
-  if (!summary || summary.trim() === "") {
-    errors.summary = "Summary cannot be empty";
-  } else if (summary.length < 10) {
-    errors.summary = "Summary should be at least 10 characters long";
-  }
-  
-  if (!content || content.trim() === "") {
-    errors.content = "Content cannot be empty";
-  } else if (content.length < 20) {
-    errors.content = "Content should be at least 20 characters long";
-  }
-  
-  if (!req.file) {
-    errors.cover = "Cover image is required";
-  }
-  
-  if (Object.keys(errors).length > 0) {
-    return res.status(400).json({ errors });
-  }
-  
-  
+app.post('/post', upload.single('file'), async (req, res) => {
   try {
     const { originalname, path } = req.file;
     const parts = originalname.split('.');
@@ -181,19 +151,26 @@ app.post('/post', upload.single('file'), authenticate, async (req, res) => {
     fs.renameSync(path, newPath);
 
     const { title, summary, content } = req.body;
-    const { id } = req.user;
 
-    const postDoc = await PostModel.create({
-      title,
-      summary,
-      content,
-      cover: newPath,
-      author: id,
+    const { token } = req.cookies;
+    jwt.verify(token, secret, {}, async (err, info) => {
+      if (err) throw err;
+      const postDoc = await PostModel.create({
+        title,
+        summary,
+        content,
+        cover: newPath,
+        author: info.id
+      });
+      res.json({ success: 'Successfully created post' });
     });
-
-    res.json(postDoc);
   } catch (error) {
-    res.status(500).json({ error: 'An error occurred' });
+    if (error.name === 'ValidationError') {
+      const errors = Object.values(error.errors).map((err) => err.message);
+      res.status(400).json({ errors });
+    } else {
+      res.status(500).json({ error: 'An error occurred' });
+    }
   }
 });
 
@@ -223,15 +200,14 @@ app.put('/post', upload.single('file'), authenticate, async (req, res) => {
       cover: newPath ? newPath : postDoc.cover,
     });
 
-     const updatedPost = await PostModel.findById(id);
+    const updatedPost = await PostModel.findById(id);
 
-  res.json({ success: 'Post updated successfully', post: updatedPost });
-
-    res.json(postDoc);
+    res.json({ success: 'Post updated successfully', post: updatedPost });
   } catch (error) {
     res.status(500).json({ error: 'An error occurred' });
   }
 });
+
 
 app.get('/post', async (req, res) => {
   try {
