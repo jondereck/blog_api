@@ -18,16 +18,16 @@ const fs = require('fs');
 
 const salt = bcrypt.genSaltSync(10);
 const secret = process.env.JWT_SECRET; // Load the secret from environment variable
-// const corsOptions = {
-//   credentials: true,
-//   origin: ['https://blog-client-jondereck.vercel.app', 'http://localhost:3000'],
-//   methods: 'GET, POST, PUT, DELETE',
-//   allowedHeaders: 'Content-Type, Authorization',
-// };
-// const store = new MongoStore({
-//   mongoUrl: process.env.MONGODB_URI,
-//   collection: 'session',
-// });
+const corsOptions = {
+  credentials: true,
+  origin: ['https://blog-client-jondereck.vercel.app.vercel.app', 'http://localhost:3000'],
+  methods: 'GET, POST, PUT, DELETE',
+  allowedHeaders: 'Content-Type, Authorization',
+};
+const store = new MongoStore({
+  mongoUrl: process.env.MONGODB_URI,
+  collection: 'session',
+});
 
 
 
@@ -45,7 +45,7 @@ app.use(session({
 }));
 
 app.set("trust proxy", 1);
-app.use(cors());
+app.use(cors(corsOptions));
 
 app.use(express.json());
 app.use(cookieParser());
