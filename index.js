@@ -20,7 +20,7 @@ const salt = bcrypt.genSaltSync(10);
 const secret = process.env.JWT_SECRET; // Load the secret from environment variable
 const corsOptions = {
   credentials: true,
-  origin: ['https://blog-kf3z.onrender.com', 'http://localhost:3000'],
+  origin: ['https://jdnblog.netlify.app', 'http://localhost:3000'],
   methods: 'GET, POST, PUT, DELETE',
   allowedHeaders: 'Content-Type, Authorization',
 };
