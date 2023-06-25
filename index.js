@@ -25,22 +25,26 @@ const corsOptions = {
   allowedHeaders: 'Content-Type, Authorization',
 };
 const store = new MongoStore({
-  mongoUrl:process.env.MONGODB_URI,
+  mongoUrl: process.env.MONGODB_URI,
   collection: 'session',
 });
 
+
+
 app.use(session({
-  secret: process.env.sessionSecret, // your secret key to check session
+  secret: process.env.JWT_SECRET, // your secret key to check session
   resave: false,
   saveUninitialized: false,
-  cookie: { maxAge: 604800000, //one week(1000*60*60*24*7)
-           sameSite: "none",
-           secure : true
-          }, 
+  cookie: {
+    maxAge: 604800000, // one week (1000*60*60*24*7)
+    sameSite: "none",
+    secure: !devModeFlag,
+    httpOnly: true
+  },
   store: store
 }));
 
-app.set("trust proxy",1);
+app.set("trust proxy", 1);
 app.use(cors(corsOptions));
 
 app.use(express.json());
@@ -162,34 +166,34 @@ app.post('/logout', (req, res) => {
 app.post('/post', upload.single('file'), authenticate, async (req, res) => {
   const { title, summary, content } = req.body;
   const errors = {};
-  
+
   if (!title || title.trim() === "") {
     errors.title = "Title cannot be empty";
   } else if (title.length < 4) {
     errors.title = "Title should be at least 4 characters long";
   }
-  
+
   if (!summary || summary.trim() === "") {
     errors.summary = "Summary cannot be empty";
   } else if (summary.length < 10) {
     errors.summary = "Summary should be at least 10 characters long";
   }
-  
+
   if (!content || content.trim() === "") {
     errors.content = "Content cannot be empty";
   } else if (content.length < 20) {
     errors.content = "Content should be at least 20 characters long";
   }
-  
+
   if (!req.file) {
     errors.cover = "Cover image is required";
   }
-  
+
   if (Object.keys(errors).length > 0) {
     return res.status(400).json({ errors });
   }
-  
-  
+
+
   try {
     const { originalname, path } = req.file;
     const parts = originalname.split('.');
@@ -240,9 +244,9 @@ app.put('/post', upload.single('file'), authenticate, async (req, res) => {
       cover: newPath ? newPath : postDoc.cover,
     });
 
-     const updatedPost = await PostModel.findById(id);
+    const updatedPost = await PostModel.findById(id);
 
-  res.json({ success: 'Post updated successfully', post: updatedPost });
+    res.json({ success: 'Post updated successfully', post: updatedPost });
 
     res.json(postDoc);
   } catch (error) {
@@ -279,22 +283,22 @@ app.delete('/post/:id', authenticate, async (req, res) => {
     const { id } = req.params;
     const { user } = req;
 
-  
-      const postDoc = await PostModel.findById(id);
-      if (!postDoc) {
-        // Post not found
-        return res.status(404).json({ error: 'Post not found' });
-      }
 
-      const isAuthor = JSON.stringify(postDoc.author) === JSON.stringify(user.id);
-      if (!isAuthor) {
-        // User is not the author of the post
-        return res.status(401).json({ error: 'You are not the author of this post' });
-      }
+    const postDoc = await PostModel.findById(id);
+    if (!postDoc) {
+      // Post not found
+      return res.status(404).json({ error: 'Post not found' });
+    }
 
-      await PostModel.findByIdAndRemove(id); // Use findByIdAndRemove to delete the post
-      res.json({ success: 'Post deleted successfully' });
-    
+    const isAuthor = JSON.stringify(postDoc.author) === JSON.stringify(user.id);
+    if (!isAuthor) {
+      // User is not the author of the post
+      return res.status(401).json({ error: 'You are not the author of this post' });
+    }
+
+    await PostModel.findByIdAndRemove(id); // Use findByIdAndRemove to delete the post
+    res.json({ success: 'Post deleted successfully' });
+
   } catch (error) {
     // Handle other potential errors
     res.status(500).json({ error: 'An error occurred' });
