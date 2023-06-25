@@ -20,7 +20,7 @@ const salt = bcrypt.genSaltSync(10);
 const secret = process.env.JWT_SECRET; // Load the secret from environment variable
 const corsOptions = {
   credentials: true,
-  origin: ['https://blog-client-b73m9uyhn-jondereck.vercel.app', 'http://localhost:3000'],
+  origin: ['https://blog-client-jondereck.vercel.app', 'http://localhost:3000'],
   methods: 'GET, POST, PUT, DELETE',
   allowedHeaders: 'Content-Type, Authorization',
 };
