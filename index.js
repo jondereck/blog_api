@@ -224,7 +224,9 @@ app.post('/post', upload.single('file'), authenticate, async (req, res) => {
       author: id,
     });
 
-    res.json(postDoc);
+    res.json({success: 'Successfully created post'})
+
+    // res.json(postDoc);
   } catch (error) {
     res.status(500).json({ error: 'An error occurred' });
   }
@@ -307,6 +309,9 @@ app.delete('/post/:id', authenticate, async (req, res) => {
       // User is not the author of the post
       return res.status(401).json({ error: 'You are not the author of this post' });
     }
+
+    const path = __dirname + '/' + postDoc.cover;
+    fs.unlinkSync(path);
 
     await PostModel.findByIdAndRemove(id); // Use findByIdAndRemove to delete the post
     res.json({ success: 'Post deleted successfully' });
