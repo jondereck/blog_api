@@ -1,11 +1,11 @@
 const express = require('express');
 const app = express();
-const session = require('express-session');
+// const session = require('express-session');
 const dotenv = require('dotenv');
 dotenv.config();
 const cors = require('cors');
 const mongoose = require('mongoose');
-const MongoStore = require('connect-mongo');
+// const MongoStore = require('connect-mongo');
 const UserModel = require('./models/User');
 const PostModel = require('./models/Post');
 const bcrypt = require('bcryptjs');
@@ -24,27 +24,27 @@ const corsOptions = {
   methods: 'GET, POST, PUT, DELETE',
   allowedHeaders: 'Content-Type, Authorization',
 };
-const store = new MongoStore({
-  mongoUrl: process.env.MONGODB_URI,
-  collection: 'session',
-});
+// const store = new MongoStore({
+//   mongoUrl: process.env.MONGODB_URI,
+//   collection: 'session',
+// });
 
 
 
-app.use(session({
-  secret: process.env.JWT_SECRET, // your secret key to check session
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    maxAge: 604800000, // one week (1000*60*60*24*7)
-    sameSite: "none",
-    secure: process.env.NODE_ENV === "production",
-    httpOnly: true
-  },
-  store: store
-}));
+// app.use(session({
+//   secret: process.env.JWT_SECRET, // your secret key to check session
+//   resave: false,
+//   saveUninitialized: false,
+//   cookie: {
+//     maxAge: 604800000, // one week (1000*60*60*24*7)
+//     sameSite: "none",
+//     secure: process.env.NODE_ENV === "production",
+//     httpOnly: true
+//   },
+//   store: store
+// }));
 
-app.set("trust proxy", 1);
+// app.set("trust proxy", 1);
 app.use(cors(corsOptions));
 
 app.use(express.json());
@@ -146,9 +146,14 @@ function authenticate(req, res, next) {
       return res.status(401).json({ error: 'Invalid token' });
     }
     req.user = info;
+
+    // Set the token cookie with SameSite attribute set to "None"
+    res.cookie('token', token, { sameSite: 'None', secure: true });
+
     next();
   });
 }
+
 
 app.get('/profile', authenticate, (req, res) => {
   res.json(req.user);
