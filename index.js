@@ -121,7 +121,11 @@ app.post('/login', async (req, res) => {
 
       jwt.sign(payload, secret, {}, (err, token) => {
         if (err) throw err;
-        res.cookie('token', token).json({
+        res.cookie('token', token, {
+          sameSite: 'none',
+          secure: true,
+          httpOnly: true
+        }).json({
           id: userDoc._id,
           username,
         });
@@ -147,8 +151,7 @@ function authenticate(req, res, next) {
     }
     req.user = info;
 
-    // Set the token cookie with SameSite attribute set to "None"
-    res.cookie('token', token, { sameSite: 'None', secure: true });
+  
 
     next();
   });
@@ -161,7 +164,11 @@ app.get('/profile', authenticate, (req, res) => {
 
 app.post('/logout', (req, res) => {
   try {
-    res.clearCookie('token').send('nice');
+    res.clearCookie('token', {
+      sameSite: 'none',
+      secure: true,
+      httpOnly: true
+    }).send('nice');
   } catch (error) {
     console.error('Logout error:', error);
     res.status(500).json('Internal server error');
