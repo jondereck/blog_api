@@ -251,6 +251,11 @@ app.put('/post', upload.single('file'), authenticate, async (req, res) => {
       return res.status(401).json({ error: 'You are not the author' });
     }
 
+       // Delete the old cover if a new cover is provided
+       if (newPath && postDoc.cover !== newPath) {
+        fs.unlinkSync(postDoc.cover);
+      }
+  
     await postDoc.updateOne({
       title,
       summary,
