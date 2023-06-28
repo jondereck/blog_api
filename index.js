@@ -181,8 +181,8 @@ app.post('/post', upload.single('file'), authenticate, async (req, res) => {
 
   if (!title || title.trim() === "") {
     errors.title = "Title cannot be empty";
-  } else if (title.length < 4) {
-    errors.title = "Title should be at least 4 characters long";
+  } else if (title.length < 5) {
+    errors.title = "Title should be at least 5 characters long";
   }
 
   if (!summary || summary.trim() === "") {
