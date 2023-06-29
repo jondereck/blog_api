@@ -70,20 +70,30 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'An error occurred' });
 });
 
+
+
+// Backend Code
 app.post('/register', async (req, res) => {
   const { username, password } = req.body;
-  if (username.length < 4) {
-    return res.status(400).json({ error: 'Username should be at least 4 characters long' });
+  const errors = {};
+
+  if (!username || username.trim() === "") {
+    errors.username = "Username cannot be empty";
+  } else if (username.length < 4) {
+    errors.username = "Username should be at least 4 characters long";
+  } else if (/\s/.test(username)) {
+    errors.username = "Username should not contain spaces";
   }
 
-  if (!/(?=.*\d)(?=.*[a-z])(?=.*[A-Z])/.test(password)) {
-    return res.status(400).json({ error: 'Password should contain at least one lowercase, uppercase letter, and digit' });
+  if (!password || password.trim() === "") {
+    errors.password = "Password cannot be empty";
+  } else if (!/(?=.*\d)(?=.*[a-z])(?=.*[A-Z])/.test(password)) {
+    errors.password = " Password should contain at least one lowercase, uppercase letter, and digit";
   }
 
-  if (/\s/.test(username)) {
-    return res.status(400).json({ error: 'Username should not contain spaces' });
+  if (Object.keys(errors).length > 0) {
+    return res.status(400).json({ errors: errors });
   }
-
 
   try {
     const userDoc = await UserModel.create({
@@ -93,9 +103,10 @@ app.post('/register', async (req, res) => {
     res.json({ success: 'Registration successful' });
   } catch (error) {
     if (error.code === 11000 && error.keyPattern && error.keyPattern.username) {
-      res.status(400).json({ error: 'Username already taken' });
+      res.status(400).json({ errors: { username: 'Username already taken' } });
+
     } else {
-      res.status(400).json({ error: 'Registration failed' });
+      res.status(400).json({ errors: 'Registration failed' });
     }
   }
 });
@@ -151,7 +162,7 @@ function authenticate(req, res, next) {
     }
     req.user = info;
 
-  
+
 
     next();
   });
@@ -224,7 +235,7 @@ app.post('/post', upload.single('file'), authenticate, async (req, res) => {
       author: id,
     });
 
-    res.json({success: 'Successfully created post'})
+    res.json({ success: 'Successfully created post' })
 
     // res.json(postDoc);
   } catch (error) {
@@ -251,11 +262,11 @@ app.put('/post', upload.single('file'), authenticate, async (req, res) => {
       return res.status(401).json({ error: 'You are not the author' });
     }
 
-       // Delete the old cover if a new cover is provided
-       if (newPath && postDoc.cover !== newPath) {
-        fs.unlinkSync(postDoc.cover);
-      }
-  
+    // Delete the old cover if a new cover is provided
+    if (newPath && postDoc.cover !== newPath) {
+      fs.unlinkSync(postDoc.cover);
+    }
+
     await postDoc.updateOne({
       title,
       summary,
